@@ -1,0 +1,23 @@
+{% extends 'bootstrap/base.html' %}
+
+
+{% block content %}
+
+<div class="container">
+  <button><a href="{{url_for('register')}}">Register</a></button>
+  <br>
+  <button><a href="{{url_for('get_data')}}">Get your data</a></button>
+  {% with messages = get_flashed_messages() %}
+        {% if messages %}
+          <ul class=flashes>
+          {% for message in messages %}
+              <li><p style="color:red">{{ message }}</p></li>
+          {% endfor %}
+        </ul>
+        {% endif %}
+      {% endwith %}
+
+</div>
+
+
+{% endblock %}
