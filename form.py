@@ -1,6 +1,6 @@
 from flask_wtf import FlaskForm
 from wtforms import StringField, SubmitField, TextAreaField
-from wtforms.validators import DataRequired, Email, AnyOf
+from wtforms.validators import DataRequired, Email
 from flask_wtf.file import FileField, FileRequired, FileAllowed
 
 
@@ -20,3 +20,5 @@ class InfoForm(FlaskForm):
 class EmailForm(FlaskForm):
     email = StringField("Enter your email", validators=[DataRequired(), Email()])
     submit = SubmitField("Send")
+
+

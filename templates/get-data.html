@@ -1,0 +1,21 @@
+{% extends 'bootstrap/base.html' %}
+{% import "bootstrap/wtf.html" as wtf %}
+
+{% block content %}
+
+<div class="container">
+  <h1>Your Data:</h1>
+  <h3>name: </h3>
+  <P>{{data.name}}</P>
+  <h3>last name:</h3>
+  <p> {{data.last_name}}</p>
+  <h3>email:</h3>
+  <p>{{data.email}}</p>
+  <h3>comment:</h3>
+  <p>{{data.comment_field}}</p>
+  <button><a href="{{url_for('get_data', file='pdf')}}">pdf file</a></button>
+  <button><a href="{{url_for('get_data', file='img')}}">img file</a></button>
+
+</div>
+
+{% endblock %}

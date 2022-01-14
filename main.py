@@ -1,9 +1,10 @@
 from functools import wraps
-from flask import Flask, render_template, redirect, url_for, flash, request, session
+from flask import Flask, render_template, redirect, url_for, flash, session, send_file, request
 from flask_sqlalchemy import SQLAlchemy
 from form import InfoForm, EmailForm
 from flask_bootstrap import Bootstrap
 import jwt
+from io import BytesIO
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'SomeSecretKey'
@@ -22,6 +23,7 @@ def not_allow_with_token(func):
             flash("U already filled the form")
             return redirect(url_for("home"))
         return func(*args, **kwargs)
+
     return inner
 
 
@@ -33,6 +35,7 @@ def check_for_data_id(func):
             return func(*args, **kwargs)
         flash("U need to fill the form in register to access this page")
         return redirect(url_for("home"))
+
     return inner
 
 
@@ -44,6 +47,7 @@ def allow_only_with_token(func):
             return func(*args, **kwargs)
         flash("U need to fill all the forms to made this action")
         return redirect(url_for("home"))
+
     return inner
 
 
@@ -62,8 +66,6 @@ class User(db.Model):
 
 @app.route("/")
 def home():
-    # when testing uncomment the line below so u can fill the forms multiple times
-    # session.clear()
     return render_template("index.html")
 
 
@@ -122,16 +124,33 @@ def enter_email():
     return render_template("get-email.html", form=form)
 
 
-# TODO make a path to delete the saved token (for testing only)
-# TODO make the templates look batter
-
-@app.route("/get-data", methods=["POST", "GET"])
+# this path will give your data from the db
+@app.route("/get-data")
 @allow_only_with_token
 def get_data():
-    # TODO send an email to the enterd email with all the data provided
+    # get hold of the jwt data
+    token = session["token"]
+    decoded = jwt.decode(token, app.config['SECRET_KEY'], algorithms="HS256")
+    # use the data from the jwt token to get the data from the db
+    data = User.query.get(decoded["id"])
+    # send the files if requested
+    if request.method == "GET":
+        if request.args.get("file") == "pdf":
+            return send_file(BytesIO(data.pdf_file), download_name=data.pdf_file_name, as_attachment=True)
+        elif request.args.get("file") == "img":
+            return send_file(BytesIO(data.img_file), download_name=data.img_file_name, as_attachment=True)
+
+    return render_template("get-data.html", data=data)
+
+
+# this path will delete the saved token, useful for testing
+@app.route("/delete")
+@allow_only_with_token
+def delete():
+    session.clear()
+    flash("session cleared")
     return redirect(url_for("home"))
 
 
 if __name__ == "__main__":
     app.run(debug=True)
-
